@@ -17,10 +17,13 @@ using SupportFragmentManager = Android.Support.V4.App.FragmentManager;
 using SupportFragmentTransaction = Android.Support.V4.App.FragmentTransaction;
 
 using PullToRefresharp.Android.Views;
+using PullToRefresharp.SwipeMenuList;
+using Android.Graphics.Drawables;
+using Android.Graphics;
 
 namespace Sample.Android.Fragments
 {
-    public class SampleListFragment : SupportListFragment
+    public class SampleListFragment : SupportListFragment, ISwipeMenuCreator, IOnMenuItemClickListener
     {
         // LOOK HERE!
         // The easiest way to interact with your pull to refresh view is to 
@@ -46,6 +49,13 @@ namespace Sample.Android.Fragments
 
             while (items.Count < 100) {
                 items.AddRange(items);
+            }
+
+            var lv = ListView as PullToRefresharp.Android.Widget.ListView;
+            if (lv != null)
+            {
+                lv.SetMenuCreator(this);
+                lv.SetOnMenuItemClickListener(this);
             }
 
             ListView.FastScrollEnabled = FastScrollEnabled;
@@ -96,6 +106,33 @@ namespace Sample.Android.Fragments
         private void listview_ItemClick(object sender, AdapterView.ItemClickEventArgs args)
         {
             Toast.MakeText(Activity, args.Position + " Clicked", ToastLength.Short).Show();
+        }
+
+        public void Create(SwipeMenu menu)
+        {
+            SwipeMenuItem item = new SwipeMenuItem(Activity.BaseContext);
+            item.Title = "Item 1";
+            item.Background = new ColorDrawable(Color.Gray);
+			item.Width = Dp2Px (50);
+            menu.AddMenuItem(item);
+
+            item = new SwipeMenuItem(Activity.BaseContext);
+            item.Title ="Item 2";
+            item.Background = new ColorDrawable(Color.Red);
+			item.Width = Dp2Px (50);
+            menu.AddMenuItem(item);
+        }
+
+		private int Dp2Px(int dp)
+		{
+			return (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, dp,
+				Activity.BaseContext.Resources.DisplayMetrics);
+		}
+
+        public bool OnMenuItemClick(int position, SwipeMenu menu, int index)
+        {
+            Toast.MakeText(Activity.BaseContext, "The Position is " + position + " And Index Is" + index, ToastLength.Short).Show();
+            return true;
         }
     }
 }
